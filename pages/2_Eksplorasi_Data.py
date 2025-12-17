@@ -60,7 +60,7 @@ DB_PORT = "27684"
 DB_NAME = "railway"
 
 # --- Buat engine di luar try biar bisa diimport ---
-engine = create_engine(f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
+engine = create_engine(f"mysql+pymysql://root:cCoiaAEpiqVgAaqcAyjdxORwIDyKWGZw@tramway.proxy.rlwy.net:27684/railway")
 
 
 # ===============================
