@@ -190,7 +190,7 @@ from processing_masuk import insert_to_mysql
 # ===============================
 # Koneksi ke DB
 # ===============================
-engine = create_engine("mysql+pymysql://root:72741516@localhost:3306/db_venteriner")
+engine = create_engine(f"mysql+pymysql://root:cCoiaAEpiqVgAaqcAyjdxORwIDyKWGZw@tramway.proxy.rlwy.net:27684/railway")
 
 # Load data sertifikat_masuk
 @st.cache_data(ttl=10)  # TTL = time to live, data cache akan refresh setiap 10 detik
