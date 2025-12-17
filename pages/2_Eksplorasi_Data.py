@@ -53,7 +53,14 @@ from sqlalchemy import create_engine
 # ===============================
 # Koneksi Database
 # ===============================
-engine = create_engine("mysql+pymysql://root:72741516@localhost:3306/db_venteriner")
+DB_USER = "root"
+DB_PASS = "cCoiaAEpiqVgAaqcAyjdxORwIDyKWGZw"
+DB_HOST = "tramway.proxy.rlwy.net"
+DB_PORT = "27684"
+DB_NAME = "railway"
+
+# --- Buat engine di luar try biar bisa diimport ---
+engine = create_engine(f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
 
 
 # ===============================
