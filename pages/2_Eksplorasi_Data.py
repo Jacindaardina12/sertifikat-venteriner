@@ -28,7 +28,7 @@ st.set_page_config(
 )
 
 st.title("Eksplorasi Data Veteriner")
-st.write("Visualisasi interaktif data distribusi komoditas dan hewan masuk.")
+st.write("Visualisasi interaktif data distribusi komoditas dan hewan masuk")
 
 st.markdown("""
 <style>
