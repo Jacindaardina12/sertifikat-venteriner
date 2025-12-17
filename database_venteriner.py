@@ -3,10 +3,10 @@ import pandas as pd
 
 # --- Konfigurasi koneksi ---
 DB_USER = "root"
-DB_PASS = "72741516"
-DB_HOST = "localhost"
-DB_PORT = "3306"
-DB_NAME = "db_venteriner"
+DB_PASS = "cCoiaAEpiqVgAaqcAyjdxORwIDyKWGZw"
+DB_HOST = "tramway.proxy.rlwy.net"
+DB_PORT = "27684"
+DB_NAME = "railway"
 
 # --- Buat engine di luar try biar bisa diimport ---
 engine = create_engine(f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
