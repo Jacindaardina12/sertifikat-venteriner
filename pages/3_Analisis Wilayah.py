@@ -5,7 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from clustering_segmentasi import scaling_data, train_kmeans
-from evaluation_segmentasi import elbow_method, silhouette_scores
+from Evaluation_segmentasi import elbow_method, silhouette_scores
 from visualization_segmentasi import (
     tampilkan_ringkasan,
     tabel_segmentasi,
