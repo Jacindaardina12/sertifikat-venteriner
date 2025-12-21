@@ -1,7 +1,6 @@
 # visualization_segmentasi.py
 
 import streamlit as st
-import pandas as pd
 import numpy as np
 
 
@@ -10,7 +9,7 @@ def tampilkan_ringkasan(df):
 
     col1, col2, col3 = st.columns(3)
 
-    col1.metric("Jumlah Segment", df.shape[0])
+    col1.metric("Jumlah Entitas", df.shape[0])
     col2.metric("Jumlah Cluster", df['cluster'].nunique())
     col3.metric("Total Volume", int(df['total_volume'].sum()))
 
@@ -21,21 +20,16 @@ def tabel_segmentasi(df):
 
 
 def profil_cluster(df):
-    st.subheader("📊 Profil Rata-rata Cluster")
+    st.subheader("📊 Profil Rata-rata Tiap Cluster")
 
-    # Ambil kolom numerik saja
-    kolom_numerik = df.select_dtypes(include=[np.number])
-
-    profil = kolom_numerik.groupby(df['cluster']).mean().round(2)
+    numerik = df.select_dtypes(include=[np.number])
+    profil = numerik.groupby(df['cluster']).mean().round(2)
 
     st.dataframe(profil, use_container_width=True)
 
 
-def top_wilayah(df, top_n=10):
-    st.subheader("🏆 Top Segment Berdasarkan Volume")
-
-    # Deteksi kolom identitas utama
-    kolom_id = df.select_dtypes(include='object').columns[0]
+def top_entitas(df, kolom_id, top_n=10):
+    st.subheader("🏆 Top Entitas Berdasarkan Volume")
 
     top = (
         df.sort_values('total_volume', ascending=False)
