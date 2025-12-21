@@ -1,93 +1,122 @@
-from pathlib import Path
+# pages/segmentasi.py
+
 import streamlit as st
+import pandas as pd
+import matplotlib.pyplot as plt
 
-BASE_DIR = Path(__file__).resolve().parents[1]
-logo_path = BASE_DIR / "assets" / "dinpert.png"
-
-st.set_page_config(
-    page_title="Segmentasi Pelanggan",
-    page_icon=str(logo_path),
-    layout="wide"
-)
-
-
-# app.py
-import streamlit as st
-from clustering_segmentasi import kmeans_segmentasi
+from clustering_segmentasi import scaling_data, train_kmeans
+from evaluation_segmentasi import elbow_method, silhouette_scores
 from visualization_segmentasi import (
     tampilkan_ringkasan,
     tabel_segmentasi,
     profil_cluster,
-    top_wilayah
+    top_entitas
 )
 from insight_segmentasi import tampilkan_insight
 
-st.set_page_config(
-    page_title="Segmentasi Pelanggan",
-    layout="wide"
+from sklearn.decomposition import PCA
+
+
+st.title("📊 Proses Segmentasi Pemohon (End-to-End)")
+
+# =========================
+# LOAD DATA (CONTOH)
+# =========================
+# df_agg HARUS sudah berupa data agregasi
+# contoh kolom: PEMOHON, total_volume, total_transaksi, variasi_jenis_hpm
+
+df_agg = st.session_state.get("df_segmentasi")
+
+if df_agg is None:
+    st.warning("Data segmentasi belum dimuat.")
+    st.stop()
+
+kolom_id = "PEMOHON"
+
+# =========================
+# 1. PEMILIHAN FITUR
+# =========================
+st.subheader("1️⃣ Pemilihan Fitur")
+
+fitur_opsi = df_agg.select_dtypes(include="number").columns.tolist()
+fitur = st.multiselect(
+    "Pilih fitur untuk segmentasi:",
+    fitur_opsi,
+    default=fitur_opsi
 )
 
+# =========================
+# 2. SCALING
+# =========================
+st.subheader("2️⃣ Scaling Data")
 
-st.markdown("""
-<style>
-    
-    
-    /* Main Background with Gradient */
-    .stApp {
-        background: linear-gradient(90deg,rgba(30, 59, 46, 1) 2%, rgba(34, 56, 46, 1) 57%, rgba(29, 133, 112, 1) 100%);
-    }
-    .stSidebar {
-        background: linear-gradient(90deg,rgba(19, 38, 30, 1) 100%, rgba(29, 133, 112, 1) 100%);
+X_scaled, scaler = scaling_data(df_agg, fitur)
+st.success("Scaling berhasil dilakukan")
 
-    }
-            .stAppHeader {
-                display: none;
-            }
-</style>             
-""", unsafe_allow_html=True)  
+# =========================
+# 3. EVALUASI CLUSTER
+# =========================
+st.subheader("3️⃣ Evaluasi Jumlah Cluster")
 
+k_range = range(2, 7)
+inertia = elbow_method(X_scaled, k_range)
+silhouette = silhouette_scores(X_scaled, k_range)
 
-st.title("📊 Dashboard Segmentasi Pelanggan Veteriner")
-st.caption(
-    "Segmentasi pelanggan berdasarkan wilayah, jenis hewan, dan produk hewan"
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown("**Elbow Method**")
+    fig, ax = plt.subplots()
+    ax.plot(list(k_range), inertia, marker="o")
+    ax.set_xlabel("Jumlah Cluster (k)")
+    ax.set_ylabel("Inertia")
+    st.pyplot(fig)
+
+with col2:
+    st.markdown("**Silhouette Score**")
+    fig, ax = plt.subplots()
+    ax.plot(list(k_range), silhouette, marker="o")
+    ax.set_xlabel("Jumlah Cluster (k)")
+    ax.set_ylabel("Silhouette Score")
+    st.pyplot(fig)
+
+# =========================
+# 4. MODEL FINAL
+# =========================
+st.subheader("4️⃣ Model K-Means Final")
+
+k = st.slider("Pilih jumlah cluster terbaik:", 2, 6, 3)
+
+model, labels = train_kmeans(X_scaled, k)
+df_agg["cluster"] = labels
+
+# =========================
+# 5. PCA VISUALIZATION
+# =========================
+st.subheader("5️⃣ Visualisasi PCA")
+
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X_scaled)
+
+df_pca = pd.DataFrame(X_pca, columns=["PC1", "PC2"])
+df_pca["cluster"] = df_agg["cluster"]
+
+fig, ax = plt.subplots()
+scatter = ax.scatter(
+    df_pca["PC1"],
+    df_pca["PC2"],
+    c=df_pca["cluster"],
+    cmap="tab10"
 )
+ax.set_xlabel("PC1")
+ax.set_ylabel("PC2")
+st.pyplot(fig)
 
-# PAGE ICON
-import os
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # folder Project/
-logo_path = os.path.join(BASE_DIR, "assets", "dinpert.png")
-
-# Load data
-import pandas as pd
-from database_venteriner import engine
-from preprocessing_segmentasi import preprocess_segmentasi
-
-query = """
-SELECT
-    JUMLAH,
-    URAIAN,
-    JENIS_HPM,
-    SATUAN,
-    KOTA_ASAL,
-    PROV_ASAL
-FROM sertifikat_masuk
-"""
-
-df_raw = pd.read_sql(query, engine)
-
-mode = st.selectbox(
-    "Pilih Mode Segmentasi",
-    ["kota", "provinsi", "hewan", "produk"]
-)
-
-df_segment = preprocess_segmentasi(df_raw, mode)
-
-df_clustered = kmeans_segmentasi(df_segment, n_clusters=3)
-
-tampilkan_ringkasan(df_clustered)
-st.divider()
-tabel_segmentasi(df_clustered)
-profil_cluster(df_clustered)
-top_wilayah(df_clustered)
-tampilkan_insight(df_clustered)
-
+# =========================
+# 6. HASIL & INSIGHT
+# =========================
+tampilkan_ringkasan(df_agg)
+tabel_segmentasi(df_agg)
+profil_cluster(df_agg)
+top_entitas(df_agg, kolom_id)
+tampilkan_insight(df_agg)
