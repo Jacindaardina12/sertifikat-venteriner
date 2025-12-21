@@ -1,45 +1,40 @@
+# insight_segmentasi.py
+
 import streamlit as st
+
 
 def tampilkan_insight(df):
     st.subheader("🧠 Insight Segmentasi")
 
     summary = (
         df.groupby('cluster')
-        .agg(
-            rata_volume=('total_volume', 'mean'),
-            rata_frekuensi=('frekuensi', 'mean')
-        )
+        .mean(numeric_only=True)
         .reset_index()
     )
 
-    cluster_tinggi = summary.loc[summary['rata_volume'].idxmax(), 'cluster']
-    cluster_rendah = summary.loc[summary['rata_volume'].idxmin(), 'cluster']
+    cluster_tinggi = summary.loc[
+        summary['total_volume'].idxmax(), 'cluster'
+    ]
+    cluster_rendah = summary.loc[
+        summary['total_volume'].idxmin(), 'cluster'
+    ]
 
     col1, col2 = st.columns(2)
 
     with col1:
-        st.markdown("### 🔥 Aktivitas Tertinggi")
-        st.success(f"Cluster {int(cluster_tinggi)}")
-        st.caption("Wilayah dengan volume pemasukan paling besar")
+        st.success(f"🔥 Cluster Aktivitas Tertinggi: {int(cluster_tinggi)}")
+        st.caption("Memiliki rata-rata volume paling besar")
 
     with col2:
-        st.markdown("### 💤 Aktivitas Terendah")
-        st.warning(f"Cluster {int(cluster_rendah)}")
-        st.caption("Wilayah dengan aktivitas pemasukan rendah")
+        st.warning(f"💤 Cluster Aktivitas Terendah: {int(cluster_rendah)}")
+        st.caption("Memiliki rata-rata volume paling kecil")
 
     st.divider()
 
-    st.markdown("### 📍 Wilayah Dominan per Cluster")
-
-    for c in sorted(df['cluster'].unique()):
-        wilayah = (
-            df[df['cluster'] == c]
-            .sort_values('total_volume', ascending=False)
-            .iloc[:5, 0]
-            .tolist()
-        )
-
-        st.markdown(f"""
-**Cluster {c}**  
-<span style="color:#9ef0c3">{", ".join(wilayah)}</span>
-""", unsafe_allow_html=True)
+    st.markdown("### 📌 Kesimpulan Umum")
+    st.markdown(
+        """
+        Segmentasi menunjukkan perbedaan pola aktivitas antar cluster
+        yang dapat digunakan sebagai dasar pengambilan kebijakan dan prioritas layanan.
+        """
+    )
