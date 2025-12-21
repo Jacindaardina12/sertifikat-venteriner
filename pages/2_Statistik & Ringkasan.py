@@ -174,7 +174,7 @@ st.success(f"Dataset terfilter: {len(df_filtered)} baris")
 # 1. TREN DISTRIBUSI KOMODITAS
 # ===============================
 
-st.subheader("📈 Tren Distribusi Komoditas per Bulan")
+st.subheader("Tren Distribusi Komoditas per Bulan")
 
 tab_hewan, tab_produk = st.tabs(["🐄 Hewan Hidup", "🍖 Produk Hewan"])
 
@@ -201,17 +201,28 @@ with tab_produk:
 # 2. TOTAL MASUK PER KOMODITAS
 # ===============================
 
-st.subheader("📦 Total Masuk per Komoditas")
+st.subheader("Total Masuk per Komoditas")
 
 df_total = df_filtered.groupby("JENIS_HPM")["JUMLAH"].sum().reset_index()
 
-st.bar_chart(df_total.set_index("JENIS_HPM")["JUMLAH"])
+df_total = (
+    df_total
+    .sort_values("JUMLAH", ascending=False)
+    .reset_index(drop=True)
+)
+
+df_total["JUMLAH"] = df_total["JUMLAH"].round(0).astype(int)
+
+st.table(df_total)
+
+
+
 
 # ===============================
 # 5. TOP 5 PEMOHON (BERDASARKAN JUMLAH SERTIFIKAT)
 # ===============================
 
-st.subheader("🏆 Top 5 Pemohon – Berdasarkan Jumlah Sertifikat (Frekuensi)")
+st.subheader("Top 5 Pemohon – Berdasarkan Jumlah Sertifikat (Frekuensi)")
 
 # Pastikan kolom PEMOHON ada
 if "PEMOHON" not in df_filtered.columns:
