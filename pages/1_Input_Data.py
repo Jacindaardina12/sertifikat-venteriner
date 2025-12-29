@@ -171,8 +171,11 @@ if 'df_processed' in st.session_state:
     st.cache_data.clear()
 
 # ====== Info Tambahan ======
-if 'df_processed' in st.session_state:
+if "df_processed" in st.session_state and st.session_state["df_processed"] is not None:
     st.info(f"Jumlah baris siap upload: {len(st.session_state['df_processed'])}")
+else:
+    st.warning("Data belum siap di-upload.")
+
 
 
 
