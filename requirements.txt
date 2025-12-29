@@ -7,3 +7,4 @@ pymysql
 plotly
 streamlit
 sqlalchemy
+openpyxl
